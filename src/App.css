@@ -3,4 +3,14 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  flex-grow: 1;
+}
+
+.secretWord {
+  font-family: monospace;
+}
+
+.spoiler {
+  color: black;
+  background-color: black;
 }
