@@ -45,7 +45,7 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: s
 
     rows.unshift(
       <div className='guessRow' key={`${guessId}-${guess}`}>
-        {isMatch ? "✅" : "❌"}: <span className="guessLetters">{letterBoxes.map((lb) => { return lb })}</span>
+        <span className="guessLetters">{letterBoxes.map((lb) => { return lb })}</span>
       </div>
     )
   })
