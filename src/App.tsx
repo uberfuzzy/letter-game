@@ -33,7 +33,19 @@ function App() {
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    const key = event.key;
+    // Allow only letters
+    if (!/^[a-zA-Z]$/.test(key) && key !== 'Backspace' && key !== 'Tab' && key !== 'Enter') {
+      event.preventDefault();
+      return;
+    }
+
+    if (inputValue.length >= 5 && key !== 'Backspace' && key !== 'Tab' && key !== 'Enter') {
+      event.preventDefault();
+      return;
+    }
+
+    if (key === 'Enter') {
       if (inputValue.length === 5) {
         // add to history
         setGuesses(guesses => [...guesses, inputValue]);
@@ -45,7 +57,10 @@ function App() {
       } else {
         window.alert("enter exactly 5 letters")
       }
+      // key was handled, stop here
+      return;
     }
+
   };
 
   return (
@@ -58,11 +73,13 @@ function App() {
         {randomWord && !winState && (
           <input
             type="text"
+            id="wordInput"
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             disabled={winState}
             pattern="[A-Za-z]{5}"
+            size={7}
           />
         )}
       </div>

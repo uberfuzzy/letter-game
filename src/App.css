@@ -14,3 +14,10 @@
   color: black;
   background-color: black;
 }
+
+#wordInput {
+  font-size: 125%;
+  padding: 6px;
+  text-align: center;
+  font-variant: small-caps;
+}
