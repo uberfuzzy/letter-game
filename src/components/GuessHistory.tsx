@@ -2,7 +2,6 @@ const yesClass = 'correct_exact';
 const maybeClass = 'correct_wrong';
 const noClass = 'incorrect';
 
-import { Fragment } from "react/jsx-runtime";
 import "./GuessHistory.css";
 
 export function GuessHistory({ current, thepast }: { current: string, thepast: string[] }) {
@@ -32,7 +31,7 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: s
         }
       });
 
-      const incorrectLetters = currentLetters.filter((cl, ci) => {
+      const incorrectLetters = currentLetters.filter((_cl, ci) => {
         return matchMap[ci] != 2;
       }
       ).join("");
