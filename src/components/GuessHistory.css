@@ -1,15 +1,21 @@
 #history {
   margin: 0.5em;
 }
-.guessRow {
+#historyRows {
+  border-spacing: 4px;
+}
+
+tr.guessRow {
   margin-bottom: 2px;
   width: max-content;
 }
 .guessNumber {
   text-align: right;
-  padding-right: 0.5em;
-  min-width: 2em;
-  display: inline-block;
+}
+.guessNumber,
+.fakeNumber {
+  padding-inline: 4px 4px;
+  min-width: 1.5em;
 }
 .guessLetters {
   display: inline-grid;
@@ -17,17 +23,17 @@
   column-gap: 4px;
 }
 .letterBox {
-  width: auto;
-  aspect-ratio: 1;
-  padding: 2px;
+  /* aspect-ratio: 1 / 1; */
+  /* height: auto; */
+  width: 2em;
+  padding: 0rem 0.25rem;
   border-width: 2px;
-  height: 2.5em;
   align-content: space-evenly;
   color: white;
 }
 
 .correct_exact {
-  border-style: solid;
+  border-style: ridge;
   border-color: lime;
   background-color: rgb(0, 255, 0, 0.25);
 }

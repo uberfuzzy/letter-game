@@ -47,9 +47,11 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: s
 
     const letterBoxes: JSX.Element[] = matchMap.map((mm, index) => {
       const matchClass = mm == 2 ? yesClass : (mm == 1 ? maybeClass : noClass);
-      return (<>
-        <span key={`guess-${guessId}-letter-${index}`} className={`letterBox ${matchClass}`}>{guessLetters[index].toLocaleUpperCase()}</span>
-      </>)
+      return (
+        <td key={`guess-${guessId}-letter-${index}`} className={`letterBox ${matchClass}`}>
+          {guessLetters[index].toLocaleUpperCase()}
+        </td>
+      )
     })
 
     rows.unshift([guessId + 1, letterBoxes]);
@@ -57,20 +59,22 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: s
 
   return <>
     <div id="history">
-      <div id="historyRows">
-        {rows.map((r, ri) => {
-          const [guessId, letterBoxes] = r;
+      <table id="historyRows">
+        <tbody>
+          {rows.map((r, ri) => {
+            const [guessId, letterBoxes] = r;
 
-          return (<>
-            <div key={`guess-${ri}`} className='guessRow' data-guess={guessId}>
-              <span className="guessNumber">{guessId}</span>
-              <span className="guessLetters">{letterBoxes}</span>
-              <span className="guessNumber"></span>
-            </div>
-          </>
-          )
-        })}
-      </div>
-    </div >
+            return (<>
+              <tr key={`guess-${ri}`} className='guessRow' data-guess={guessId}>
+                <td className="guessNumber">{guessId}</td>
+                {letterBoxes}
+                <td className="fakeNumber"></td>
+              </tr>
+            </>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   </>
 }
