@@ -3,7 +3,6 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 
 import './App.css'
 import { GuessType, GuessHistory } from './components/GuessHistory';
-import WebSocketClient from './components/WebSocketClient';
 
 export function App() {
   const [words, setWords] = useState<string[]>([]);
@@ -11,11 +10,6 @@ export function App() {
   const [guesses, setGuesses] = useState<GuessType[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [winState, setWinState] = useState<boolean>(false);
-
-  const [status, setStatus] = useState<string>('🟠'); // Initial status is reconnecting
-  const [statusText, setStatusText] = useState<string>('not connected'); // Initial status is reconnecting
-
-  const ws = useRef<WebSocket | null>(null);
 
   // Use refs to store the latest values
   const randomWordRef = useRef(randomWord);
@@ -45,6 +39,9 @@ export function App() {
       setInputValue("");
       setGuesses([]);
       setWinState(false);
+      window.setTimeout(() => {
+        document.getElementById('wordInput')?.focus();
+      }, 1);
     }
   }, [words]);
 
@@ -112,113 +109,10 @@ export function App() {
 
   };
 
-
-  useEffect(() => {
-    const connectWebSocket = () => {
-      setStatus('🟡'); // Attempting to reconnect
-      setStatusText('Attempting to reconnect'); // Attempting to reconnect
-      ws.current = new WebSocket('ws://localhost:8080');
-
-      ws.current.onopen = () => {
-        console.log('Connected to server');
-        setStatus('🟢'); // Connected
-        setStatusText('connected'); // Connected
-
-        // Send registration message
-        if (ws.current) {
-          ws.current.send(JSON.stringify({ type: 'register', as: 'game' }));
-        }
-      };
-
-      ws.current.onmessage = (event) => {
-        console.log(`WS Received message: ${event.data}`);
-        // Process incoming messages here if needed
-
-        const parsedMessage = JSON.parse(event.data.toString());
-        console.log(parsedMessage);
-
-        if (parsedMessage !== false) {
-          switch (parsedMessage?.type) {
-            case "guess":
-              doGuess(parsedMessage?.guess ?? "", 'net');
-              break;
-            case "hello":
-              // server said hello
-              console.log("HELLO from server");
-              break;
-            case "command":
-              // got a request to run a command
-              console.log("incoming command!", parsedMessage?.command);
-              switch (parsedMessage?.command) {
-                case "newword":
-                  console.log("currnet winState is:", winStateRef.current);
-                  if (winStateRef.current === true) {
-                    console.log("attempting to call handleGetRandomWord()")
-                    handleGetRandomWord();
-                  } else {
-                    console.log("game isnt won, ignoring `newword` comand")
-                  }
-                  break;
-                default:
-                  console.error("unhandled command triggered", parsedMessage?.command);
-              }
-              break;
-            default:
-              // other type
-              console.log(`unknown 'type': ${parsedMessage?.type ?? "<nullish>"}`);
-
-          }
-        } else {
-          //was false, bad parse
-          console.error("non structured message:", JSON.stringify(event.data));
-        }
-
-      };
-
-      ws.current.onclose = () => {
-        console.log('Disconnected from server');
-        setStatus('🔴'); // Disconnected
-        setStatusText('disconnected'); // Disconnected
-        setTimeout(connectWebSocket, 3000); // Reconnect after 3 seconds
-      };
-
-      ws.current.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
-    };
-
-    connectWebSocket();
-
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, [doGuess, handleGetRandomWord]);
-
-  const bigCommand = {
-    fontSize: "x-large",
-    color: "red",
-    padding: "0.5rem",
-    margin: "0.5rem",
-    width: "fit-content",
-    display: "inline-block",
-    borderStyle: "outset",
-  }
-
-  const innerBigCommand = {
-    textDecoration: "underline dotted",
-    color: "white",
-    fontSize: "150%"
-  }
-
   return (
     <>
       <div id="controls">
-        <WebSocketClient status={status} statusText={statusText} />
         <button onClick={handleGetRandomWord}>♻️ New Random Word</button>
-        {randomWord && !winState && <span title={randomWord}>🆘</span>}
-        {randomWord && winState && <span title="good job!">👍</span>}
       </div>
       <div>
         {randomWord && !winState && (
@@ -234,13 +128,6 @@ export function App() {
               size={7}
               placeholder='guess?'
             />
-            <br />
-            <big style={bigCommand}>use <code style={innerBigCommand}>!guess [your word]</code> in chat</big>
-          </>
-        )}
-        {randomWord && winState && (
-          <>
-            <big style={bigCommand}>use <code style={innerBigCommand}>!newword</code> in chat</big>
           </>
         )}
       </div>

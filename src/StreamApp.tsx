@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 import './App.css'
+import './StreamApp.css'
+
 import { GuessType, GuessHistory } from './components/GuessHistory';
 import WebSocketClient from './components/WebSocketClient';
 
@@ -9,7 +11,6 @@ export function StreamApp() {
   const [words, setWords] = useState<string[]>([]);
   const [randomWord, setRandomWord] = useState<string>('');
   const [guesses, setGuesses] = useState<GuessType[]>([]);
-  const [inputValue, setInputValue] = useState<string>('');
   const [winState, setWinState] = useState<boolean>(false);
 
   const [status, setStatus] = useState<string>('🟠'); // Initial status is reconnecting
@@ -30,6 +31,24 @@ export function StreamApp() {
     winStateRef.current = winState;
   }, [winState]);
 
+  const doNewWordStuff = useCallback(() => {
+    if (words.length > 0) {
+      setWinState(false);
+      setGuesses([]);
+      const newWord = selectRandomWord(words).toLocaleLowerCase();
+      console.log("doNewWordStuff()", `new word is: ${newWord}`);
+
+      if (ws && ws?.current) {
+        ws.current.send(JSON.stringify({ type: 'newWord', word: newWord }));
+      }
+
+      setRandomWord(newWord);
+    }
+  }, [words])
+
+  const handleGetRandomWord = () => {
+    doNewWordStuff();
+  };
 
   useEffect(() => {
     const fetchAndSetWords = async () => {
@@ -38,15 +57,6 @@ export function StreamApp() {
     };
     fetchAndSetWords();
   }, []);
-
-  const handleGetRandomWord = useCallback(() => {
-    if (words.length > 0) {
-      setRandomWord(getRandomWord(words).toLocaleLowerCase());
-      setInputValue("");
-      setGuesses([]);
-      setWinState(false);
-    }
-  }, [words]);
 
   const doGuess = useCallback((inGuess: string, src = 'local') => {
     const currentRandomWord = randomWordRef.current;
@@ -80,38 +90,7 @@ export function StreamApp() {
     if (currentRandomWord.toLocaleLowerCase() === inGuess.toLocaleLowerCase()) {
       setWinState(true);
     }
-    setInputValue("");
   }, []);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value.toLocaleLowerCase());
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const key = event.key;
-    // Allow only letters
-    if (!/^[a-zA-Z]$/.test(key) && key !== 'Backspace' && key !== 'Tab' && key !== 'Enter') {
-      event.preventDefault();
-      return;
-    }
-
-    if (inputValue.length >= 5 && key !== 'Backspace' && key !== 'Tab' && key !== 'Enter') {
-      event.preventDefault();
-      return;
-    }
-
-    if (key === 'Enter') {
-      if (inputValue.length === 5) {
-        doGuess(inputValue);
-      } else {
-        window.alert("enter exactly 5 letters")
-      }
-      // key was handled, stop here
-      return;
-    }
-
-  };
-
 
   useEffect(() => {
     const connectWebSocket = () => {
@@ -123,6 +102,8 @@ export function StreamApp() {
         console.log('Connected to server');
         setStatus('🟢'); // Connected
         setStatusText('connected'); // Connected
+
+        doNewWordStuff();
 
         // Send registration message
         if (ws.current) {
@@ -153,8 +134,8 @@ export function StreamApp() {
                 case "newword":
                   console.log("currnet winState is:", winStateRef.current);
                   if (winStateRef.current === true) {
-                    console.log("attempting to call handleGetRandomWord()")
-                    handleGetRandomWord();
+                    console.log("attempting to call doNewWordStuff()")
+                    doNewWordStuff();
                   } else {
                     console.log("game isnt won, ignoring `newword` comand")
                   }
@@ -194,53 +175,26 @@ export function StreamApp() {
         ws.current.close();
       }
     };
-  }, [doGuess, handleGetRandomWord]);
-
-  const bigCommand = {
-    fontSize: "x-large",
-    color: "red",
-    padding: "0.5rem",
-    margin: "0.5rem",
-    width: "fit-content",
-    display: "inline-block",
-    borderStyle: "outset",
-  }
-
-  const innerBigCommand = {
-    textDecoration: "underline dotted",
-    color: "white",
-    fontSize: "150%"
-  }
+  }, [doGuess, doNewWordStuff]);
 
   return (
     <>
+      <h1>Letter Game (on Stream)</h1>
       <div id="controls">
-        <WebSocketClient status={status} statusText={statusText} />
-        <button onClick={handleGetRandomWord}>♻️ New Random Word</button>
-        {randomWord && !winState && <span title={randomWord}>🆘</span>}
-        {randomWord && winState && <span title="good job!">👍</span>}
+        <span className='upperLeft'>
+          <WebSocketClient status={status} statusText={statusText} />
+        </span>
+        <button className='upperRight' onClick={handleGetRandomWord}>♻️</button>
       </div>
       <div>
         {randomWord && !winState && (
           <>
-            <input
-              type="text"
-              id="wordInput"
-              value={inputValue}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              disabled={winState}
-              pattern="[A-Za-z]{5}"
-              size={7}
-              placeholder='guess?'
-            />
-            <br />
-            <big style={bigCommand}>use <code style={innerBigCommand}>!guess [your word]</code> in chat</big>
+            <big className='bigCommand'>use <code className='innerBigCommand'>!guess [your word]</code> in chat</big>
           </>
         )}
         {randomWord && winState && (
           <>
-            <big style={bigCommand}>use <code style={innerBigCommand}>!newword</code> in chat</big>
+            <big className='bigCommand'>use <code className='innerBigCommand'>!newword</code> in chat</big>
           </>
         )}
       </div>
@@ -263,7 +217,7 @@ async function fetchWords(filePath: string): Promise<string[]> {
   }
 }
 
-function getRandomWord(words: string[]): string {
+function selectRandomWord(words: string[]): string {
   const randomIndex = Math.floor(Math.random() * words.length);
   return words[randomIndex];
 }

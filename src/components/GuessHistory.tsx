@@ -84,14 +84,13 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: G
       <table id="historyRows">
         <tbody>
           {rows.map((r, ri) => {
-            const [guessId, letterBoxes, src] = r;
+            const [guessId, letterBoxes, _src] = r;
             console.debug(r);
 
             return (
               <tr key={`guess-${ri}`} className='guessRow' data-guess={guessId}>
                 <td className="guessNumber">{guessId}</td>
                 {letterBoxes}
-                <td className="srcBox">{src}</td>
               </tr>
             )
           })}
