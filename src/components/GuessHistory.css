@@ -13,7 +13,7 @@ tr.guessRow {
   text-align: right;
 }
 .guessNumber,
-.fakeNumber {
+.srcBox {
   padding-inline: 4px 4px;
   min-width: 1.5em;
 }

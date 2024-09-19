@@ -14,7 +14,19 @@ ws.on('open', () => {
 });
 
 ws.on('message', (data) => {
-  console.log(`Received from server: ${data}`);
+  const parsedMessage = JSON.parse(data.toString());
+  if (parsedMessage !== false) {
+    switch (parsedMessage?.type) {
+      case "hello":
+        // do nothing;
+        break;
+      default:
+        console.log(`unknown type: ${parsedMessage?.type}`, typeof parsedMessage?.type);
+    }
+  } else {
+    console.log(`Received from server: ${data}`);
+  }
+
 });
 
 ws.on('close', () => {
@@ -29,9 +41,18 @@ ws.on('error', (error) => {
 
 function promptUser() {
   rl.question('Enter message: ', (message) => {
-    if (message.toLowerCase() === 'exit') {
+    const messageLow = message.toLowerCase();
+
+    if (messageLow === 'exit') {
       ws.close();
+    } else if (messageLow.startsWith("!guess") || messageLow.startsWith("!g")) {
+      const [junk, guess] = messageLow.split(" ");
+
+      ws.send(JSON.stringify({ "target": "game", "type": "guess", "guess": guess }));
+      promptUser(); // Prompt again for the next message
+
     } else {
+      // other, send raw
       ws.send(message);
       promptUser(); // Prompt again for the next message
     }

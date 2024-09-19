@@ -3,15 +3,27 @@ const maybeClass = 'correct_wrong';
 const noClass = 'incorrect';
 
 import "./GuessHistory.css";
+type historyEntry = [number, JSX.Element[], string]
 
-export function GuessHistory({ current, thepast }: { current: string, thepast: string[] }) {
-  const rows: [number, JSX.Element[]][] = [];
+export type GuessType = {
+  guess: string,
+  src: string
+}
 
-  thepast.forEach((guess, guessId) => {
-    const isMatch = guess.toLocaleLowerCase() === current.toLocaleLowerCase();
+export function GuessHistory({ current, thepast }: { current: string, thepast: GuessType[] }) {
+  const rows: historyEntry[] = [];
 
-    const currentLetters = current.split("");
+  const currentLow = current.toLocaleLowerCase();
+  const currentLetters = current.split("");
+  // console.log("current stuff>", current, currentLetters);
+
+  thepast.forEach((entry, guessId) => {
+    const { guess, src } = entry;
+    const guessLow = guess.toLocaleLowerCase();
+    const isMatch = guessLow === currentLow;
+
     const guessLetters = guess.split("");
+    console.log(guess, guessLetters);
 
     // make some slots, default to all wrong
     const matchMap: number[] = new Array(current.length).fill(0);
@@ -54,7 +66,17 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: s
       )
     })
 
-    rows.unshift([guessId + 1, letterBoxes]);
+    let srcOut = '';
+    switch (src) {
+      case 'local':
+        srcOut = '⌨️';
+        break;
+      case 'net':
+        srcOut = '🌎';
+        break;
+    }
+
+    rows.unshift([guessId + 1, letterBoxes, srcOut]);
   })
 
   return <>
@@ -62,15 +84,15 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: s
       <table id="historyRows">
         <tbody>
           {rows.map((r, ri) => {
-            const [guessId, letterBoxes] = r;
+            const [guessId, letterBoxes, src] = r;
+            console.debug(r);
 
-            return (<>
+            return (
               <tr key={`guess-${ri}`} className='guessRow' data-guess={guessId}>
                 <td className="guessNumber">{guessId}</td>
                 {letterBoxes}
-                <td className="fakeNumber"></td>
+                <td className="srcBox">{src}</td>
               </tr>
-            </>
             )
           })}
         </tbody>
