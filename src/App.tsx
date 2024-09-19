@@ -11,6 +11,8 @@ export function App() {
   const [inputValue, setInputValue] = useState<string>('');
   const [winState, setWinState] = useState<boolean>(false);
   const [newWordText, setNewWordText] = useState<string>('Start!');
+  const [inputRegex, setInputRegex] = useState<string>("[A-Za-z]{5}");
+  const [wordLengthSelect, setWordLengthSelect] = useState<number>(5);
 
   // Use refs to store the latest values
   const randomWordRef = useRef(randomWord);
@@ -19,6 +21,7 @@ export function App() {
   // Update refs whenever state changes
   useEffect(() => {
     randomWordRef.current = randomWord;
+    setInputRegex(`[A-Za-z]{${randomWord.length}}`);
   }, [randomWord]);
 
   useEffect(() => {
@@ -28,11 +31,11 @@ export function App() {
 
   useEffect(() => {
     const fetchAndSetWords = async () => {
-      const words = await fetchWords('./words5.txt');
+      const words = await fetchWords(`./words${wordLengthSelect}.txt`);
       setWords(words);
     };
     fetchAndSetWords();
-  }, []);
+  }, [wordLengthSelect]);
 
   const handleGetRandomWord = useCallback(() => {
     if (words.length > 0) {
@@ -62,14 +65,14 @@ export function App() {
       console.log("doGuess) empty guess, likely broken/missing");
       return;
     }
-    if (inGuess.length !== 5) {
-      console.log("doGuess) guess wrong length");
+    if (inGuess.length !== currentRandomWord.length) {
+      console.log("doGuess) guess wrong length", inGuess?.length, currentRandomWord?.length);
       return;
     }
 
     const cleanGuess = inGuess.toLocaleLowerCase().replace(/[^a-z]*/g, "");
-    if (cleanGuess.length !== 5) {
-      console.log("doGuess) clean guess wrong length. needed ===5, got ", cleanGuess.length, typeof cleanGuess, { cleanGuess });
+    if (cleanGuess.length !== currentRandomWord.length) {
+      console.log(`doGuess) clean guess wrong length. needed ===${currentRandomWord.length}, got `, cleanGuess.length, typeof cleanGuess, { cleanGuess });
       return;
     }
 
@@ -94,16 +97,16 @@ export function App() {
       return;
     }
 
-    if (inputValue.length >= 5 && key !== 'Backspace' && key !== 'Tab' && key !== 'Enter') {
+    if (inputValue.length >= randomWord.length && key !== 'Backspace' && key !== 'Tab' && key !== 'Enter') {
       event.preventDefault();
       return;
     }
 
     if (key === 'Enter') {
-      if (inputValue.length === 5) {
+      if (inputValue.length === randomWord.length) {
         doGuess(inputValue);
       } else {
-        window.alert("enter exactly 5 letters")
+        window.alert(`enter exactly ${randomWord.length} letters`)
       }
       // key was handled, stop here
       return;
@@ -111,10 +114,21 @@ export function App() {
 
   };
 
+  const handleLengthRadioChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    // event.preventDefault();
+    const myValue = parseInt(event.target.value, 10);
+    setWordLengthSelect(myValue);
+  }, [])
+
   return (
     <>
       <h1>Letter Game</h1>
       <div id="controls">
+        <div>
+          Word length set:
+          <label><input type='radio' name='wordLengthRadio' value='5' onChange={handleLengthRadioChange} defaultChecked /> 5</label>
+          <label><input type='radio' name='wordLengthRadio' value='6' onChange={handleLengthRadioChange} /> 6</label>
+        </div>
         <button onClick={handleGetRandomWord}>{newWordText}</button>
       </div>
       <div>
@@ -127,10 +141,12 @@ export function App() {
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
               disabled={winState}
-              pattern="[A-Za-z]{5}"
+              pattern={inputRegex}
               size={7}
-              placeholder='guess?'
+              placeholder=''
             />
+            <br />
+            Length: {randomWord.length}<br />
           </>
         )}
       </div>

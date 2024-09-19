@@ -59,6 +59,7 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: G
 
     const letterBoxes: JSX.Element[] = matchMap.map((mm, index) => {
       const matchClass = mm == 2 ? yesClass : (mm == 1 ? maybeClass : noClass);
+      console.log({ mm, index, gl: guessLetters?.[index] })
       return (
         <td key={`guess-${guessId}-letter-${index}`} className={`letterBox ${matchClass}`}>
           {guessLetters[index].toLocaleUpperCase()}
