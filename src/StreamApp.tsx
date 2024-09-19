@@ -184,7 +184,7 @@ export function StreamApp() {
         <span className='upperLeft'>
           <WebSocketClient status={status} statusText={statusText} />
         </span>
-        <button className='upperRight' onClick={handleGetRandomWord}>♻️</button>
+        <button className='upperRight hideUnlessHover' onClick={handleGetRandomWord}>♻️</button>
       </div>
       <div>
         {randomWord && !winState && (

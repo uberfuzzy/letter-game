@@ -10,6 +10,7 @@ export function App() {
   const [guesses, setGuesses] = useState<GuessType[]>([]);
   const [inputValue, setInputValue] = useState<string>('');
   const [winState, setWinState] = useState<boolean>(false);
+  const [newWordText, setNewWordText] = useState<string>('Start!');
 
   // Use refs to store the latest values
   const randomWordRef = useRef(randomWord);
@@ -41,6 +42,7 @@ export function App() {
       setWinState(false);
       window.setTimeout(() => {
         document.getElementById('wordInput')?.focus();
+        setNewWordText('♻️ New Random Word');
       }, 1);
     }
   }, [words]);
@@ -111,8 +113,9 @@ export function App() {
 
   return (
     <>
+      <h1>Letter Game</h1>
       <div id="controls">
-        <button onClick={handleGetRandomWord}>♻️ New Random Word</button>
+        <button onClick={handleGetRandomWord}>{newWordText}</button>
       </div>
       <div>
         {randomWord && !winState && (

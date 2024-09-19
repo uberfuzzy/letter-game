@@ -23,7 +23,7 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: G
     const isMatch = guessLow === currentLow;
 
     const guessLetters = guess.split("");
-    console.log(guess, guessLetters);
+    // console.log(guess, guessLetters);
 
     // make some slots, default to all wrong
     const matchMap: number[] = new Array(current.length).fill(0);
@@ -85,7 +85,7 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: G
         <tbody>
           {rows.map((r, ri) => {
             const [guessId, letterBoxes, _src] = r;
-            console.debug(r);
+            // console.debug(r);
 
             return (
               <tr key={`guess-${ri}`} className='guessRow' data-guess={guessId}>

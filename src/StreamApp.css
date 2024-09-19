@@ -34,3 +34,10 @@ div#controls {
   top: 0;
   right: 0;
 }
+
+.hideUnlessHover {
+  opacity: 0.05;
+  &:hover {
+    opacity: 1;
+  }
+}
