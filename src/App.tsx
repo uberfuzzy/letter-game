@@ -12,7 +12,7 @@ export function App() {
   const [winState, setWinState] = useState<boolean>(false);
   const [newWordText, setNewWordText] = useState<string>('Start!');
   const [inputRegex, setInputRegex] = useState<string>("[A-Za-z]{5}");
-  const [wordLengthSelect, setWordLengthSelect] = useState<number>(5);
+  const [wordSetLength, setWordSetLength] = useState<number>(5);
 
   // Use refs to store the latest values
   const randomWordRef = useRef(randomWord);
@@ -31,11 +31,11 @@ export function App() {
 
   useEffect(() => {
     const fetchAndSetWords = async () => {
-      const words = await fetchWords(`./words${wordLengthSelect}.txt`);
+      const words = await fetchWords(`./words${wordSetLength}.txt`);
       setWords(words);
     };
     fetchAndSetWords();
-  }, [wordLengthSelect]);
+  }, [wordSetLength]);
 
   const handleGetRandomWord = useCallback(() => {
     if (words.length > 0) {
@@ -117,7 +117,7 @@ export function App() {
   const handleLengthRadioChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     // event.preventDefault();
     const myValue = parseInt(event.target.value, 10);
-    setWordLengthSelect(myValue);
+    setWordSetLength(myValue);
   }, [])
 
   return (

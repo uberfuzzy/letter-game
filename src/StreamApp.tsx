@@ -16,6 +16,8 @@ export function StreamApp() {
   const [status, setStatus] = useState<string>('🟠'); // Initial status is reconnecting
   const [statusText, setStatusText] = useState<string>('not connected'); // Initial status is reconnecting
 
+  const [wordSetLength, _setWordSetLength] = useState<number>(5);
+
   const ws = useRef<WebSocket | null>(null);
 
   // Use refs to store the latest values
@@ -52,11 +54,11 @@ export function StreamApp() {
 
   useEffect(() => {
     const fetchAndSetWords = async () => {
-      const words = await fetchWords('./words5.txt');
+      const words = await fetchWords(`./words${wordSetLength}.txt`);
       setWords(words);
     };
     fetchAndSetWords();
-  }, []);
+  }, [wordSetLength]);
 
   const doGuess = useCallback((inGuess: string, src = 'local') => {
     const currentRandomWord = randomWordRef.current;
@@ -73,14 +75,14 @@ export function StreamApp() {
       console.log("doGuess) empty guess, likely broken/missing");
       return;
     }
-    if (inGuess.length !== 5) {
+    if (inGuess.length !== currentRandomWord.length) {
       console.log("doGuess) guess wrong length");
       return;
     }
 
     const cleanGuess = inGuess.toLocaleLowerCase().replace(/[^a-z]*/g, "");
-    if (cleanGuess.length !== 5) {
-      console.log("doGuess) clean guess wrong length. needed ===5, got ", cleanGuess.length, typeof cleanGuess, { cleanGuess });
+    if (cleanGuess.length !== currentRandomWord.length) {
+      console.log(`doGuess) clean guess wrong length. needed ===${currentRandomWord.length}, got `, cleanGuess.length, typeof cleanGuess, { cleanGuess });
       return;
     }
 
@@ -103,6 +105,8 @@ export function StreamApp() {
         setStatus('🟢'); // Connected
         setStatusText('connected'); // Connected
 
+        // TODO somehow check and only do this on (re)connect if randomWord is blank or if winState==win
+        // aka dont interupt a game in progress
         doNewWordStuff();
 
         // Send registration message
@@ -189,7 +193,8 @@ export function StreamApp() {
       <div>
         {randomWord && !winState && (
           <>
-            <big className='bigCommand'>use <code className='innerBigCommand'>!guess [your word]</code> in chat</big>
+            <big className='bigCommand'>use <code className='innerBigCommand'>!guess [your word]</code> in chat</big><br />
+            Word Length: {randomWord.length}|{wordSetLength}<br />
           </>
         )}
         {randomWord && winState && (
