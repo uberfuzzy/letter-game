@@ -16,7 +16,7 @@ export function StreamApp() {
   const [status, setStatus] = useState<string>('🟠'); // Initial status is reconnecting
   const [statusText, setStatusText] = useState<string>('not connected'); // Initial status is reconnecting
 
-  const [wordSetLength, _setWordSetLength] = useState<number>(5);
+  const [wordSetLength, setWordSetLength] = useState<number>(5);
 
   const ws = useRef<WebSocket | null>(null);
 
@@ -137,13 +137,18 @@ export function StreamApp() {
               switch (parsedMessage?.command) {
                 case "newword":
                   console.log("currnet winState is:", winStateRef.current);
-                  if (winStateRef.current === true) {
-                    console.log("attempting to call doNewWordStuff()")
+                  if (winStateRef.current === true || parsedMessage?.user === "uberfuzzy") {
+                    console.log("attempting to call doNewWordStuff()");
                     doNewWordStuff();
                   } else {
-                    console.log("game isnt won, ignoring `newword` comand")
+                    console.log("game isnt won, ignoring `newword` comand");
                   }
                   break;
+
+                case "wordSet":
+                  setWordSetLength(parseInt(parsedMessage.size, 10));
+                  break;
+
                 default:
                   console.error("unhandled command triggered", parsedMessage?.command);
               }
