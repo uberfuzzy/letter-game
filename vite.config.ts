@@ -9,8 +9,7 @@ export default defineConfig({
   "build": {
     "rollupOptions": {
       "input": {
-        main: resolve(__dirname, 'index.html'),
-        stream: resolve(__dirname, 'stream.html'),
+        main: resolve(__dirname, 'index.html')
       },
     },
   }

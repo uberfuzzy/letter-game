@@ -3,11 +3,11 @@ const maybeClass = 'correct_wrong';
 const noClass = 'incorrect';
 
 import "./GuessHistory.css";
-type historyEntry = [number, JSX.Element[], string]
+type historyEntry = [number, string, number[]]
 
 export type GuessType = {
   guess: string,
-  src: string
+  who: string,
 }
 
 export function GuessHistory({ current, thepast }: { current: string, thepast: GuessType[] }) {
@@ -18,7 +18,7 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: G
   // console.log("current stuff>", current, currentLetters);
 
   thepast.forEach((entry, guessId) => {
-    const { guess, src } = entry;
+    const { guess } = entry;
     const guessLow = guess.toLocaleLowerCase();
     const isMatch = guessLow === currentLow;
 
@@ -57,46 +57,46 @@ export function GuessHistory({ current, thepast }: { current: string, thepast: G
       });
     }
 
-    const letterBoxes: JSX.Element[] = matchMap.map((mm, index) => {
-      const matchClass = mm == 2 ? yesClass : (mm == 1 ? maybeClass : noClass);
-      console.log({ mm, index, gl: guessLetters?.[index] })
-      return (
-        <td key={`guess-${guessId}-letter-${index}`} className={`letterBox ${matchClass}`}>
-          {guessLetters[index].toLocaleUpperCase()}
-        </td>
-      )
-    })
-
-    let srcOut = '';
-    switch (src) {
-      case 'local':
-        srcOut = '⌨️';
-        break;
-      case 'net':
-        srcOut = '🌎';
-        break;
-    }
-
-    rows.unshift([guessId + 1, letterBoxes, srcOut]);
+    rows.unshift([guessId + 1, guess, matchMap]);
   })
 
   return <>
     <div id="history">
-      <table id="historyRows">
-        <tbody>
-          {rows.map((r, ri) => {
-            const [guessId, letterBoxes, _src] = r;
-            // console.debug(r);
+      <div id="historyRows">
+        {rows.map((hEnt, ri) => {
+          const [guessId, guessWord, guessMap] = hEnt;
+          // console.debug(hEnt);
 
-            return (
-              <tr key={`guess-${ri}`} className='guessRow' data-guess={guessId}>
-                <td className="guessNumber">{guessId}</td>
-                {letterBoxes}
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
+          return (
+            <div key={`guess-${ri}`} className='guessRow' data-guess={guessId}>
+              <div className="guessNumber">{guessId}</div>
+              <div className="guessLetters">
+                <LetterBoxes guessId={guessId} guessWord={guessWord} matchMap={guessMap} />
+              </div>
+              <div className="guessName"></div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   </>
+}
+
+const LetterBoxes = ({ guessId, guessWord, matchMap }: { guessId: number, guessWord: string, matchMap: number[] }) => {
+  const guessLetters = guessWord.split("");
+
+  return (<table className="guessLettersTable">
+    <tbody><tr>
+      {matchMap.map((mm, index) => {
+        const matchClass = mm == 2 ? yesClass : (mm == 1 ? maybeClass : noClass);
+        // console.log({ mm, index, gl: guessLetters?.[index] })
+        return (
+          <td key={`guess-${guessId}-letter-${index}`} className={`letterBox ${matchClass}`}>
+            {guessLetters[index].toLocaleUpperCase()}
+          </td>
+        )
+      })}
+    </tr></tbody>
+  </table>)
+
 }

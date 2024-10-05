@@ -50,7 +50,7 @@ export function App() {
     }
   }, [words]);
 
-  const doGuess = useCallback((inGuess: string, src = 'local') => {
+  const doGuess = useCallback((inGuess: string, inWho = '') => {
     const currentRandomWord = randomWordRef.current;
     const currentWinState = winStateRef.current;
     if (!currentRandomWord || currentRandomWord === "") {
@@ -77,7 +77,7 @@ export function App() {
     }
 
     // push to top of history
-    setGuesses(guesses => [...guesses, { guess: cleanGuess, src }]);
+    setGuesses(guesses => [...guesses, { guess: cleanGuess, who: inWho }]);
     // clear it
     if (currentRandomWord.toLocaleLowerCase() === inGuess.toLocaleLowerCase()) {
       setWinState(true);
@@ -104,7 +104,7 @@ export function App() {
 
     if (key === 'Enter') {
       if (inputValue.length === randomWord.length) {
-        doGuess(inputValue);
+        doGuess(inputValue, '');
       } else {
         window.alert(`enter exactly ${randomWord.length} letters`)
       }
@@ -146,7 +146,7 @@ export function App() {
               placeholder=''
             />
             <br />
-            Length: {randomWord.length}<br />
+            Word Length: {"🟦".repeat(randomWord.length)}<br />
           </>
         )}
       </div>
